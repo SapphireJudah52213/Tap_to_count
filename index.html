@@ -19,8 +19,8 @@
         width: 100%;
         min-height: 100%;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        background: #353535;
-        color: #227;
+        background: #101114;
+        color: #f5f5f7;
     }
 
     body {
@@ -34,8 +34,9 @@
 
     h1 {
         text-align: center;
-        margin: 10px 0 20px;
+        margin: 10px 0 22px;
         font-size: 32px;
+        letter-spacing: -0.5px;
     }
 
     /* Add counter */
@@ -49,13 +50,21 @@
     .add-section input {
         flex: 1;
         min-width: 0;
-        padding: 14px;
-        border: none;
+        padding: 15px;
+        border: 1px solid #292b30;
         border-radius: 14px;
         font-size: 17px;
-        background: gray;
+        background: #1b1d21;
+        color: #f5f5f7;
         outline: none;
-        box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+
+    .add-section input::placeholder {
+        color: #8e9096;
+    }
+
+    .add-section input:focus {
+        border-color: #0a84ff;
     }
 
     .add-section button {
@@ -64,25 +73,31 @@
         padding: 0 18px;
         font-size: 17px;
         font-weight: 600;
-        background: #0036aa;
+        background: #0a84ff;
         color: white;
+    }
+
+    .add-section button:active {
+        transform: scale(.96);
     }
 
     /* Counter */
 
     .counter {
-        background: #474747;
+        background: #1b1d21;
+        border: 1px solid #292b30;
         border-radius: 22px;
         padding: 20px;
         margin-bottom: 16px;
-        box-shadow: 0 3px 12px rgba(0,0,0,.08);
+        box-shadow: 0 4px 15px rgba(0,0,0,.25);
     }
 
     .counter-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 10px;
+        gap: 10px;
+        margin-bottom: 5px;
     }
 
     .counter-name {
@@ -93,11 +108,16 @@
 
     .delete-button {
         border: none;
-        background: #ff3b30;
-        color: white;
+        background: #3a1c1c;
+        color: #ff453a;
         border-radius: 10px;
-        padding: 7px 10px;
+        padding: 8px 11px;
         font-size: 14px;
+        font-weight: 600;
+    }
+
+    .delete-button:active {
+        background: #4a2222;
     }
 
     .count {
@@ -105,6 +125,7 @@
         font-size: 64px;
         font-weight: 700;
         margin: 10px 0 18px;
+        color: #ffffff;
     }
 
     .tap-button {
@@ -112,7 +133,7 @@
         height: 110px;
         border: none;
         border-radius: 20px;
-        background: #0036aa;
+        background: #0a84ff;
         color: white;
         font-size: 30px;
         font-weight: 700;
@@ -121,7 +142,7 @@
 
     .tap-button:active {
         transform: scale(.97);
-        background: #004949;
+        background: #0878e8;
     }
 
     .controls {
@@ -140,18 +161,47 @@
     }
 
     .minus {
-        background: #35353e;
+        background: #2a2c31;
+        color: #f5f5f7;
+    }
+
+    .minus:active {
+        background: #34363b;
     }
 
     .reset {
-        background: #dd9900;
+        background: #3b3318;
+        color: #ffd60a;
+    }
+
+    .reset:active {
+        background: #4a401c;
     }
 
     .empty {
         text-align: center;
-        color: #777;
+        color: #8e9096;
         padding: 40px 10px;
         font-size: 18px;
+    }
+
+    /* Make buttons feel better on touch */
+
+    button {
+        cursor: pointer;
+        touch-action: manipulation;
+    }
+
+    button:active {
+        opacity: .85;
+    }
+
+    /* iPhone safe area */
+
+    @supports (padding: env(safe-area-inset-bottom)) {
+        body {
+            padding-bottom: calc(20px + env(safe-area-inset-bottom));
+        }
     }
 </style>
 </head>
@@ -163,6 +213,7 @@
     <h1>Tap Counter</h1>
 
     <div class="add-section">
+
         <input
             id="counterName"
             type="text"
@@ -171,6 +222,7 @@
         >
 
         <button onclick="addCounter()">Add</button>
+
     </div>
 
     <div id="counters"></div>
@@ -179,22 +231,28 @@
 
 <script>
 
-let counters = JSON.parse(localStorage.getItem("tapCounters")) || [];
+let counters =
+    JSON.parse(localStorage.getItem("tapCounters")) || [];
+
 
 /* Save */
 
 function saveCounters() {
+
     localStorage.setItem(
         "tapCounters",
         JSON.stringify(counters)
     );
+
 }
+
 
 /* Add counter */
 
 function addCounter() {
 
-    const input = document.getElementById("counterName");
+    const input =
+        document.getElementById("counterName");
 
     const name = input.value.trim();
 
@@ -204,22 +262,30 @@ function addCounter() {
     }
 
     counters.push({
+
         id: Date.now(),
+
         name: name,
+
         count: 0
+
     });
 
     input.value = "";
 
     saveCounters();
+
     renderCounters();
+
 }
+
 
 /* Increase */
 
 function increase(id) {
 
-    const counter = counters.find(c => c.id === id);
+    const counter =
+        counters.find(c => c.id === id);
 
     if (!counter) return;
 
@@ -228,13 +294,16 @@ function increase(id) {
     saveCounters();
 
     updateCount(id);
+
 }
+
 
 /* Decrease */
 
 function decrease(id) {
 
-    const counter = counters.find(c => c.id === id);
+    const counter =
+        counters.find(c => c.id === id);
 
     if (!counter) return;
 
@@ -245,13 +314,16 @@ function decrease(id) {
     saveCounters();
 
     updateCount(id);
+
 }
+
 
 /* Reset */
 
 function resetCounter(id) {
 
-    const counter = counters.find(c => c.id === id);
+    const counter =
+        counters.find(c => c.id === id);
 
     if (!counter) return;
 
@@ -260,35 +332,47 @@ function resetCounter(id) {
     saveCounters();
 
     updateCount(id);
+
 }
+
 
 /* Delete */
 
 function deleteCounter(id) {
 
-    counters = counters.filter(c => c.id !== id);
+    counters =
+        counters.filter(c => c.id !== id);
 
     saveCounters();
 
     renderCounters();
+
 }
 
-/* Update only the number */
+
+/* Update number */
 
 function updateCount(id) {
 
-    const element = document.querySelector(
-        `[data-count-id="${id}"]`
-    );
+    const element =
+        document.querySelector(
+            `[data-count-id="${id}"]`
+        );
 
-    const counter = counters.find(c => c.id === id);
+    const counter =
+        counters.find(c => c.id === id);
 
     if (element && counter) {
-        element.textContent = counter.count;
+
+        element.textContent =
+            counter.count;
+
     }
+
 }
 
-/* Render */
+
+/* Render counters */
 
 function renderCounters() {
 
@@ -311,7 +395,8 @@ function renderCounters() {
 
     counters.forEach(counter => {
 
-        const div = document.createElement("div");
+        const div =
+            document.createElement("div");
 
         div.className = "counter";
 
@@ -366,33 +451,42 @@ function renderCounters() {
         `;
 
         container.appendChild(div);
+
     });
+
 }
 
-/* Prevent HTML injection from names */
+
+/* Prevent HTML injection */
 
 function escapeHTML(text) {
 
-    const div = document.createElement("div");
+    const div =
+        document.createElement("div");
 
     div.textContent = text;
 
     return div.innerHTML;
+
 }
 
-/* Press Enter to add */
+
+/* Enter key */
 
 document
     .getElementById("counterName")
     .addEventListener("keydown", function(event) {
 
         if (event.key === "Enter") {
+
             addCounter();
+
         }
 
     });
 
-/* Initial display */
+
+/* Start */
 
 renderCounters();
 
