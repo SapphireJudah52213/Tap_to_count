@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>Tap Counter</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        min-height: 100%;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #f2f2f7;
+        color: #111;
+    }
+
+    body {
+        padding: 20px;
+    }
+
+    .app {
+        max-width: 600px;
+        margin: auto;
+    }
+
+    h1 {
+        text-align: center;
+        margin: 10px 0 20px;
+        font-size: 32px;
+    }
+
+    /* Add counter */
+
+    .add-section {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .add-section input {
+        flex: 1;
+        min-width: 0;
+        padding: 14px;
+        border: none;
+        border-radius: 14px;
+        font-size: 17px;
+        background: white;
+        outline: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+
+    .add-section button {
+        border: none;
+        border-radius: 14px;
+        padding: 0 18px;
+        font-size: 17px;
+        font-weight: 600;
+        background: #007aff;
+        color: white;
+    }
+
+    /* Counter */
+
+    .counter {
+        background: white;
+        border-radius: 22px;
+        padding: 20px;
+        margin-bottom: 16px;
+        box-shadow: 0 3px 12px rgba(0,0,0,.08);
+    }
+
+    .counter-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+
+    .counter-name {
+        font-size: 23px;
+        font-weight: 700;
+        word-break: break-word;
+    }
+
+    .delete-button {
+        border: none;
+        background: #ff3b30;
+        color: white;
+        border-radius: 10px;
+        padding: 7px 10px;
+        font-size: 14px;
+    }
+
+    .count {
+        text-align: center;
+        font-size: 64px;
+        font-weight: 700;
+        margin: 10px 0 18px;
+    }
+
+    .tap-button {
+        width: 100%;
+        height: 110px;
+        border: none;
+        border-radius: 20px;
+        background: #007aff;
+        color: white;
+        font-size: 30px;
+        font-weight: 700;
+        touch-action: manipulation;
+    }
+
+    .tap-button:active {
+        transform: scale(.97);
+        background: #006ee6;
+    }
+
+    .controls {
+        display: flex;
+        gap: 10px;
+        margin-top: 12px;
+    }
+
+    .controls button {
+        flex: 1;
+        border: none;
+        border-radius: 12px;
+        padding: 12px;
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .minus {
+        background: #e5e5ea;
+    }
+
+    .reset {
+        background: #ffcc00;
+    }
+
+    .empty {
+        text-align: center;
+        color: #777;
+        padding: 40px 10px;
+        font-size: 18px;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <h1>Tap Counter</h1>
+
+    <div class="add-section">
+        <input
+            id="counterName"
+            type="text"
+            placeholder="Counter name..."
+            maxlength="30"
+        >
+
+        <button onclick="addCounter()">Add</button>
+    </div>
+
+    <div id="counters"></div>
+
+</div>
+
+<script>
+
+let counters = JSON.parse(localStorage.getItem("tapCounters")) || [];
+
+/* Save */
+
+function saveCounters() {
+    localStorage.setItem(
+        "tapCounters",
+        JSON.stringify(counters)
+    );
+}
+
+/* Add counter */
+
+function addCounter() {
+
+    const input = document.getElementById("counterName");
+
+    const name = input.value.trim();
+
+    if (!name) {
+        input.focus();
+        return;
+    }
+
+    counters.push({
+        id: Date.now(),
+        name: name,
+        count: 0
+    });
+
+    input.value = "";
+
+    saveCounters();
+    renderCounters();
+}
+
+/* Increase */
+
+function increase(id) {
+
+    const counter = counters.find(c => c.id === id);
+
+    if (!counter) return;
+
+    counter.count++;
+
+    saveCounters();
+
+    updateCount(id);
+}
+
+/* Decrease */
+
+function decrease(id) {
+
+    const counter = counters.find(c => c.id === id);
+
+    if (!counter) return;
+
+    if (counter.count > 0) {
+        counter.count--;
+    }
+
+    saveCounters();
+
+    updateCount(id);
+}
+
+/* Reset */
+
+function resetCounter(id) {
+
+    const counter = counters.find(c => c.id === id);
+
+    if (!counter) return;
+
+    counter.count = 0;
+
+    saveCounters();
+
+    updateCount(id);
+}
+
+/* Delete */
+
+function deleteCounter(id) {
+
+    counters = counters.filter(c => c.id !== id);
+
+    saveCounters();
+
+    renderCounters();
+}
+
+/* Update only the number */
+
+function updateCount(id) {
+
+    const element = document.querySelector(
+        `[data-count-id="${id}"]`
+    );
+
+    const counter = counters.find(c => c.id === id);
+
+    if (element && counter) {
+        element.textContent = counter.count;
+    }
+}
+
+/* Render */
+
+function renderCounters() {
+
+    const container =
+        document.getElementById("counters");
+
+    container.innerHTML = "";
+
+    if (counters.length === 0) {
+
+        container.innerHTML = `
+            <div class="empty">
+                No counters yet.<br>
+                Add one above!
+            </div>
+        `;
+
+        return;
+    }
+
+    counters.forEach(counter => {
+
+        const div = document.createElement("div");
+
+        div.className = "counter";
+
+        div.innerHTML = `
+
+            <div class="counter-header">
+
+                <div class="counter-name">
+                    ${escapeHTML(counter.name)}
+                </div>
+
+                <button
+                    class="delete-button"
+                    onclick="deleteCounter(${counter.id})"
+                >
+                    Delete
+                </button>
+
+            </div>
+
+            <div
+                class="count"
+                data-count-id="${counter.id}"
+            >
+                ${counter.count}
+            </div>
+
+            <button
+                class="tap-button"
+                onclick="increase(${counter.id})"
+            >
+                TAP
+            </button>
+
+            <div class="controls">
+
+                <button
+                    class="minus"
+                    onclick="decrease(${counter.id})"
+                >
+                    −1
+                </button>
+
+                <button
+                    class="reset"
+                    onclick="resetCounter(${counter.id})"
+                >
+                    Reset
+                </button>
+
+            </div>
+        `;
+
+        container.appendChild(div);
+    });
+}
+
+/* Prevent HTML injection from names */
+
+function escapeHTML(text) {
+
+    const div = document.createElement("div");
+
+    div.textContent = text;
+
+    return div.innerHTML;
+}
+
+/* Press Enter to add */
+
+document
+    .getElementById("counterName")
+    .addEventListener("keydown", function(event) {
+
+        if (event.key === "Enter") {
+            addCounter();
+        }
+
+    });
+
+/* Initial display */
+
+renderCounters();
+
+</script>
+
+</body>
+</html>
